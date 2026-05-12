@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ECO PRODUKT — Architektúra AI Sales Automation</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --green: #2e7d32; --green-light: #4caf50; --green-pale: #e8f5e9;
+      --blue: #1565c0; --blue-pale: #e3f2fd;
+      --orange: #e65100; --orange-pale: #fff3e0;
+      --gray: #546e7a; --bg: #fafafa;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: #333; }
+
+    header {
+      background: linear-gradient(135deg, #1b5e20, #2e7d32);
+      color: white; padding: 32px 48px;
+      display: flex; align-items: center; gap: 20px;
+    }
+    header h1 { font-size: 26px; font-weight: 700; }
+    header p { font-size: 14px; opacity: 0.85; margin-top: 4px; }
+    .badge { background: rgba(255,255,255,0.2); border-radius: 20px; padding: 4px 14px; font-size: 12px; margin-top: 8px; display: inline-block; }
+
+    nav {
+      background: white; border-bottom: 1px solid #e0e0e0;
+      padding: 0 48px; display: flex; gap: 0; overflow-x: auto;
+    }
+    nav a {
+      padding: 14px 20px; text-decoration: none; color: #555; font-size: 14px; font-weight: 500;
+      border-bottom: 3px solid transparent; white-space: nowrap;
+    }
+    nav a:hover, nav a.active { color: var(--green); border-bottom-color: var(--green); }
+
+    .content { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
+
+    .section { margin-bottom: 56px; }
+    .section h2 { font-size: 20px; font-weight: 700; color: var(--green); margin-bottom: 8px; padding-bottom: 8px; border-bottom: 2px solid var(--green-pale); }
+    .section p { color: #555; font-size: 14px; line-height: 1.7; margin-bottom: 20px; }
+
+    .mermaid { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); overflow-x: auto; }
+
+    .component-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 20px; }
+    .component-card {
+      background: white; border-radius: 10px; padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-left: 4px solid var(--green);
+    }
+    .component-card.blue { border-left-color: var(--blue); }
+    .component-card.orange { border-left-color: var(--orange); }
+    .component-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+    .component-card p { font-size: 13px; color: #666; line-height: 1.6; }
+    .component-card .tech { font-size: 11px; background: var(--green-pale); color: var(--green); border-radius: 4px; padding: 2px 8px; display: inline-block; margin-top: 8px; }
+    .component-card.blue .tech { background: var(--blue-pale); color: var(--blue); }
+    .component-card.orange .tech { background: var(--orange-pale); color: var(--orange); }
+
+    .flow-steps { display: flex; flex-direction: column; gap: 0; margin-top: 20px; }
+    .flow-step {
+      display: flex; gap: 16px; align-items: flex-start;
+      background: white; border-radius: 10px; padding: 16px 20px;
+      margin-bottom: 8px; box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+    }
+    .step-num {
+      width: 32px; height: 32px; border-radius: 50%; background: var(--green); color: white;
+      display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px;
+      flex-shrink: 0;
+    }
+    .flow-step h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .flow-step p { font-size: 13px; color: #666; line-height: 1.5; }
+    .flow-step .time { font-size: 11px; color: var(--green); font-weight: 600; margin-top: 4px; }
+
+    .data-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    .data-table th { background: var(--green); color: white; padding: 10px 14px; text-align: left; font-size: 13px; }
+    .data-table td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid #f0f0f0; }
+    .data-table tr:nth-child(even) td { background: var(--green-pale); }
+
+    .callout {
+      background: var(--blue-pale); border-left: 4px solid var(--blue);
+      border-radius: 0 8px 8px 0; padding: 16px 20px; margin: 20px 0; font-size: 13px; line-height: 1.7;
+    }
+    .callout.green { background: var(--green-pale); border-left-color: var(--green); }
+
+    footer { text-align: center; padding: 32px; color: #999; font-size: 12px; border-top: 1px solid #eee; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🌞 ECO PRODUKT — AI Sales Automation</h1>
+    <p>Architektúra systému pre automatizáciu predajného procesu fotovoltiky</p>
+    <span class="badge">v1.0 · Máj 2026 · Ľubomír Serafín</span>
+  </div>
+</header>
+
+<nav>
+  <a href="#overview" class="active">Prehľad</a>
+  <a href="#flow">Sales Flow</a>
+  <a href="#components">Komponenty</a>
+  <a href="#sequence">Sekvenčný diagram</a>
+  <a href="#data">Dátový model</a>
+  <a href="#tech">Tech Stack</a>
+</nav>
+
+<div class="content">
+
+  <!-- OVERVIEW -->
+  <div class="section" id="overview">
+    <h2>Prehľad systému</h2>
+    <p>Kompletná automatizácia predajného procesu FV systémov — od prvého kontaktu po záväznú ponuku — bez ľudského obchodníka. Zákazník interaguje výhradne s AI botom, ktorý zbiera dáta, počíta optimálny systém a generuje personalizovanú ponuku.</p>
+
+    <div class="mermaid">
+graph LR
+    A[🌐 Web / formulár] -->|nový kontakt| B[Odoo CRM]
+    B -->|webhook| C[n8n Orchestrator]
+    C -->|spustí konverzáciu| D[AI Bot API\nFastAPI + Claude]
+    C -->|pošle link| E[📧 Email zákazníkovi]
+    E -->|klikne link| D
+    D -->|multi-turn chat| F[🌐 Chat Widget]
+    D -->|kalkulácia| G[PV Calculator]
+    D -->|update leadu| B
+    C -->|follow-up| B
+    style D fill:#2e7d32,color:#fff
+    style C fill:#1565c0,color:#fff
+    style B fill:#e65100,color:#fff
+    </div>
+  </div>
+
+  <!-- SALES FLOW -->
+  <div class="section" id="flow">
+    <h2>Sales Flow — 8 krokov</h2>
+    <p>Celý proces od prvého kontaktu po podpísanú zmluvu prebieha automaticky. Ľudský obchodník zasahuje iba pri väčších firemných projektoch (nad 20 kWp).</p>
+
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="step-num">1</div>
+        <div>
+          <h4>Lead zachytený v Odoo</h4>
+          <p>Zákazník vyplní formulár na webe, klikne na reklamu alebo zavolá. Kontakt sa automaticky vytvorí v Odoo CRM.</p>
+          <div class="time">⏱ 0 sekúnd</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num">2</div>
+        <div>
+          <h4>Odoo spustí n8n webhook</h4>
+          <p>Odoo automation rule pošle POST request na n8n webhook s dátami kontaktu (meno, email, telefón, zdroj).</p>
+          <div class="time">⏱ automaticky pri uložení</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num">3</div>
+        <div>
+          <h4>n8n zavolá AI Bot API</h4>
+          <p>n8n pošle lead dáta na /webhook/odoo/new-lead. Bot vytvorí novú konverzáciu a vráti conversation_id + prvú správu.</p>
+          <div class="time">⏱ &lt;2 sekundy</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num">4</div>
+        <div>
+          <h4>Email s personalizovaným odkazom</h4>
+          <p>n8n pošle zákazníkovi email s unikátnym odkazom na chat widget. URL obsahuje conversation_id pre bezproblémové pokračovanie.</p>
+          <div class="time">⏱ do 30 sekúnd od záchytu leadu</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num">5</div>
+        <div>
+          <h4>AI konverzácia (7 krokov)</h4>
+          <p>Claude AI zbiera: typ nehnuteľnosti → spotreba → strecha → lokalita → budget → termín → kontakt. Každá otázka je jedna správa — prirodzený dialóg.</p>
+          <div class="time">⏱ ~5 minút zákazníkovho času</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num">6</div>
+        <div>
+          <h4>Generovanie personalizovanej ponuky</h4>
+          <p>PV Calculator vypočíta optimálny výkon (kWp), cenu, ročnú úsporu a návratnosť investície. Claude AI to prezentuje v čitateľnej forme.</p>
+          <div class="time">⏱ okamžite po zozbieraní dát</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num">7</div>
+        <div>
+          <h4>Aktualizácia Odoo + notifikácia tímu</h4>
+          <p>n8n aktualizuje lead v Odoo: stage = Qualified, doplní zozbierané dáta. Obchodný tím dostane notifikáciu s kompletným súhrnom.</p>
+          <div class="time">⏱ automaticky po dokončení chatu</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num">8</div>
+        <div>
+          <h4>Follow-up pre nekvalifikovaných</h4>
+          <p>Zákazníci, ktorí chat nedokončili, dostanú follow-up email po 3 dňoch. Celý cyklus sa opakuje.</p>
+          <div class="time">⏱ po 3 dňoch (n8n Schedule)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPONENTS -->
+  <div class="section" id="components">
+    <h2>Komponenty</h2>
+
+    <div class="component-grid">
+      <div class="component-card">
+        <h3>🤖 AI Bot API</h3>
+        <p>Jadro systému. Spravuje konverzácie, volá Claude API, spracúva tool calls (update_lead_data, generate_proposal), uchováva session state.</p>
+        <span class="tech">FastAPI · Python 3.11</span>
+      </div>
+      <div class="component-card">
+        <h3>🧠 Claude AI Engine</h3>
+        <p>claude-haiku-4-5 model s PV expert systémovým promptom. Používa tool use pre štruktúrované zber dát a spustenie kalkulácie.</p>
+        <span class="tech">Anthropic API · Tool Use</span>
+      </div>
+      <div class="component-card">
+        <h3>⚡ PV Calculator</h3>
+        <p>Výpočtová logika: kWp z spotreby, slnečná mapa SR, ROI kalkulácia, odporúčanie batérie. Pure Python, plne testovateľné.</p>
+        <span class="tech">Python · Bez externých závislostí</span>
+      </div>
+      <div class="component-card blue">
+        <h3>🔄 n8n Orchestrator</h3>
+        <p>Orchestruje celý workflow: Odoo webhook → AI Bot → email → wait → check → update Odoo → notifikácia.</p>
+        <span class="tech">n8n Cloud · 10 nodes</span>
+      </div>
+      <div class="component-card blue">
+        <h3>💬 Chat Widget</h3>
+        <p>Embedovateľný vanilla JS widget bez závislostí. Funguje na akomkoľvek webe. Podporuje typing indicator, proposal card, quick reply.</p>
+        <span class="tech">HTML/CSS/JS · Zero dependencies</span>
+      </div>
+      <div class="component-card orange">
+        <h3>🏢 Odoo CRM</h3>
+        <p>Existujúci CRM systém. Integrovaný cez webhook (outbound) a XML-RPC API (inbound update). ECO PRODUKT nemusí meniť procesy.</p>
+        <span class="tech">Odoo · XML-RPC API</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEQUENCE DIAGRAM -->
+  <div class="section" id="sequence">
+    <h2>Sekvenčný diagram</h2>
+    <p>Kompletný tok dát od zachytenia leadu po záväznú ponuku.</p>
+    <div class="mermaid">
+sequenceDiagram
+    actor Z as Zákazník
+    participant O as Odoo CRM
+    participant N as n8n
+    participant B as AI Bot API
+    participant C as Claude AI
+    participant P as PV Calculator
+
+    Z->>O: Vyplní formulár / zavolá
+    O->>N: Webhook: nový lead {id, meno, email}
+    N->>B: POST /webhook/odoo/new-lead
+    B-->>N: {conversation_id, first_message}
+    N->>Z: Email s odkazom na chat
+
+    Z->>B: Klikne link → otvorí chat
+    B->>C: System prompt + welcome message
+    C-->>B: "Dobrý deň! Aký typ nehnuteľnosti?"
+    B-->>Z: Zobrazí uvítaciu správu
+
+    loop 7-krokový kvalifikačný dialóg
+        Z->>B: Odpoveď (napr. "Rodinný dom")
+        B->>C: História konverzácie + nová správa
+        C-->>B: Ďalšia otázka + tool: update_lead_data
+        B->>B: Uloží do session state
+        B-->>Z: Zobrazí odpoveď
+    end
+
+    Z->>B: Posledná informácia (budget/termín)
+    B->>C: Kompletné dáta
+    C-->>B: tool: generate_proposal(5000 kWh, Bratislava)
+    B->>P: calculate_system(consumption, region)
+    P-->>B: PVSystemProposal{5kWp, 6250€, 8.2 roky}
+    B-->>Z: Zobrazí personalizovanú ponuku
+
+    B->>O: XML-RPC: update lead stage=Qualified
+    N->>N: Kontrola po 30 min → lead qualified
+    N->>O: Update opportunity + priority
+    N->>Z: Follow-up email s PDF ponukou
+    N->>O: Notifikácia obchodného tímu
+    </div>
+  </div>
+
+  <!-- DATA MODEL -->
+  <div class="section" id="data">
+    <h2>Dátový model — zozbierané dáta</h2>
+    <p>AI bot počas konverzácie postupne vypĺňa tento štruktúrovaný objekt. Po dokončení sa synchronizuje do Odoo CRM.</p>
+
+    <table class="data-table">
+      <thead>
+        <tr><th>Pole</th><th>Typ</th><th>Príklad</th><th>Účel</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>property_type</td><td>string</td><td>Rodinný dom</td><td>Určuje produkt (ECO HOME vs BUSINESS)</td></tr>
+        <tr><td>annual_consumption_kwh</td><td>float</td><td>5200</td><td>Základ pre výpočet výkonu systému</td></tr>
+        <tr><td>roof_area_m2</td><td>float</td><td>45</td><td>Max. kapacita systému</td></tr>
+        <tr><td>roof_orientation</td><td>string</td><td>Juh</td><td>Korekcia výroby ±15%</td></tr>
+        <tr><td>location_region</td><td>string</td><td>Bratislavský</td><td>Irradiance 900–1150 kWh/kWp</td></tr>
+        <tr><td>budget_eur</td><td>float</td><td>8000</td><td>Filtrovanie riešenia + batéria</td></tr>
+        <tr><td>timeline</td><td>string</td><td>Do 3 mesiacov</td><td>Prioritizácia v Odoo pipeline</td></tr>
+        <tr><td>name / email / phone</td><td>string</td><td>Ján Novák</td><td>Vytvorenie kontaktu v Odoo</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout green" style="margin-top:20px;">
+      <strong>Kľúčový výstup:</strong> Z týchto 8 polí PV Calculator vygeneruje: odporúčaný výkon (kWp), cenu systému, ročnú výrobu (kWh), ročnú úsporu (€), návratnosť (roky), CO₂ úspora (kg/rok) — všetko okamžite, bez ľudského vstupu.
+    </div>
+  </div>
+
+  <!-- TECH STACK -->
+  <div class="section" id="tech">
+    <h2>Tech Stack a škálovateľnosť</h2>
+
+    <div class="mermaid">
+graph TB
+    subgraph Frontend["🌐 Frontend (CDN / ecoprodukt.sk)"]
+        F1[chat widget · HTML/JS/CSS]
+        F2[Embedovateľný script tag]
+    end
+    subgraph Backend["⚙️ Backend (Railway)"]
+        B1[FastAPI app · main.py]
+        B2[/api/conversation/*]
+        B3[/webhook/odoo/*]
+        B4[In-memory sessions\nRedigeruj na Redis pre prod]
+    end
+    subgraph AI["🧠 AI Layer"]
+        A1[Claude Haiku 4.5\nAnthropic API]
+        A2[PV Calculator\nčistá Python logika]
+        A3[PV Knowledge Base\nproduktový katalóg]
+    end
+    subgraph Automation["🔄 Automation (n8n Cloud)"]
+        N1[Odoo Webhook Trigger]
+        N2[HTTP Request nodes]
+        N3[Gmail nodes]
+        N4[Wait / Schedule]
+    end
+    subgraph CRM["🏢 CRM (Odoo)"]
+        O1[crm.lead model]
+        O2[Automation Rules]
+        O3[Pipeline stages]
+    end
+    Frontend --> Backend
+    Backend --> AI
+    Automation --> Backend
+    Automation --> CRM
+    CRM --> Automation
+    </div>
+
+    <div class="callout" style="margin-top:24px;">
+      <strong>Škálovanie:</strong> Systém zvládne stovky súčasných konverzácií (Railway auto-scale). Pre produkciu odporúčam: in-memory sessions → Redis, pridať PostgreSQL pre audit log, rate limiting (10 správ/min/IP).
+    </div>
+
+    <table class="data-table" style="margin-top:16px;">
+      <thead><tr><th>Komponent</th><th>Prod náklady/mesiac</th><th>Poznámka</th></tr></thead>
+      <tbody>
+        <tr><td>Railway (backend)</td><td>~5–15 €</td><td>Hobby plan, auto-scale</td></tr>
+        <tr><td>Anthropic API (Claude Haiku)</td><td>~2–8 €</td><td>Pri 500 konverzáciách/mesiac</td></tr>
+        <tr><td>n8n Cloud</td><td>20 € (Starter)</td><td>10 000 executions/mesiac</td></tr>
+        <tr><td>Celkom</td><td><strong>~30–45 €/mesiac</strong></td><td>Za plnú automatizáciu predaja</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<footer>
+  ECO PRODUKT s.r.o. · AI Sales Automation v1.0 · Vypracoval: Ľubomír Serafín · Máj 2026
+</footer>
+
+<script>
+  mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
+
+  // Active nav highlight on scroll
+  const sections = document.querySelectorAll('.section');
+  const navLinks = document.querySelectorAll('nav a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 100) current = s.id; });
+    navLinks.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+{
+  "name": "ECO PRODUKT — AI Sales Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "odoo-new-lead",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "node-webhook-trigger",
+      "name": "🎯 Odoo: Nový Lead (Webhook)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "notes": "Odoo pošle POST request pri vytvorení nového leadu/kontaktu. Payload: { lead_id, name, email, phone, source }"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.ECO_BOT_API_URL }}/webhook/odoo/new-lead",
+        "authentication": "none",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "lead_id", "value": "={{ $json.body.lead_id }}" },
+            { "name": "name", "value": "={{ $json.body.name }}" },
+            { "name": "email", "value": "={{ $json.body.email }}" },
+            { "name": "phone", "value": "={{ $json.body.phone }}" },
+            { "name": "source", "value": "={{ $json.body.source || 'Odoo' }}" }
+          ]
+        },
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "node-start-bot",
+      "name": "🤖 Spusti AI Bot konverzáciu",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [460, 300],
+      "notes": "Zavolá náš AI Bot API. Vráti conversation_id + prvú správu bota."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.conversation_id }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "node-check-conv",
+      "name": "✅ Konverzácia vytvorená?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('🎯 Odoo: Nový Lead (Webhook)').item.json.body.email }}",
+        "subject": "Váš dotaz ohľadom fotovoltiky — ECO PRODUKT",
+        "emailType": "html",
+        "message": "=<html>\n<body style=\"font-family:Arial,sans-serif;color:#333;max-width:600px;margin:0 auto;\">\n  <div style=\"background:#2e7d32;padding:24px;text-align:center;\">\n    <h1 style=\"color:white;margin:0;font-size:24px;\">🌞 ECO PRODUKT</h1>\n    <p style=\"color:#c8e6c9;margin:8px 0 0;\">Fotovoltické systémy od 2010</p>\n  </div>\n  <div style=\"padding:32px 24px;\">\n    <p>Dobrý deň, {{ $('🎯 Odoo: Nový Lead (Webhook)').item.json.body.name }},</p>\n    <p>Ďakujeme za váš záujem o fotovoltický systém. Náš AI asistent je pripravený navrhnúť vám systém na mieru — <strong>okamžite, bez čakania na obchodníka</strong>.</p>\n    <div style=\"text-align:center;margin:32px 0;\">\n      <a href=\"{{ $env.ECO_BOT_FRONTEND_URL }}?conversation_id={{ $json.conversation_id }}\" \n         style=\"background:#2e7d32;color:white;padding:16px 32px;text-decoration:none;border-radius:8px;font-size:16px;font-weight:bold;display:inline-block;\">\n        ⚡ Získať návrh systému zadarmo\n      </a>\n    </div>\n    <p style=\"color:#666;font-size:14px;\">Proces trvá ~5 minút. Dostanete konkrétnu ponuku s cenou a návratnosťou investície.</p>\n    <hr style=\"border:none;border-top:1px solid #eee;margin:24px 0;\"/>\n    <p style=\"font-size:12px;color:#999;\">ECO PRODUKT s.r.o. · www.ecoprodukt.sk · Ak si neželáte ďalšiu komunikáciu, odpovedzte na tento email.</p>\n  </div>\n</body>\n</html>",
+        "options": {}
+      },
+      "id": "node-send-email",
+      "name": "📧 Pošli email zákazníkovi",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [900, 200],
+      "notes": "Pošle personalizovaný email s odkazom na AI chat. Link obsahuje conversation_id pre bezproblémové pokračovanie."
+    },
+    {
+      "parameters": {
+        "amount": 30,
+        "unit": "minutes"
+      },
+      "id": "node-wait",
+      "name": "⏱️ Čakaj 30 minút",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [900, 380],
+      "notes": "Čakáme kým zákazník dokončí konverzáciu s AI botom."
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.ECO_BOT_API_URL }}/api/conversation/{{ $('🤖 Spusti AI Bot konverzáciu').item.json.conversation_id }}",
+        "options": {}
+      },
+      "id": "node-get-conv-status",
+      "name": "📊 Zisti stav konverzácie",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1120, 380],
+      "notes": "Získa aktuálny stav konverzácie — či zákazník poskytol údaje a aká je jeho fáza."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.state }}",
+              "value2": "proposal",
+              "operation": "equal"
+            }
+          ]
+        }
+      },
+      "id": "node-check-qualified",
+      "name": "🎯 Zákazník kvalifikovaný?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1340, 380],
+      "notes": "Ak state=proposal, zákazník dostal ponuku = kvalifikovaný lead. Ak nie, posielame follow-up."
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "baseId": "={{ $env.ODOO_BASE_URL }}",
+        "resource": "crm.lead",
+        "id": "={{ $('🎯 Odoo: Nový Lead (Webhook)').item.json.body.lead_id }}",
+        "updateFields": {
+          "description": "=AI Bot konverzácia dokončená.\n\nZákazník: {{ $('📊 Zisti stav konverzácie').item.json.lead_data.name }}\nSpotreba: {{ $('📊 Zisti stav konverzácie').item.json.lead_data.annual_consumption_kwh }} kWh/rok\nKraj: {{ $('📊 Zisti stav konverzácie').item.json.lead_data.location_region }}\nBudget: {{ $('📊 Zisti stav konverzácie').item.json.lead_data.budget_eur }} €",
+          "stage_id": 2,
+          "priority": "1"
+        }
+      },
+      "id": "node-update-odoo-qualified",
+      "name": "✅ Odoo: Označ ako Kvalifikovaný",
+      "type": "n8n-nodes-base.odoo",
+      "typeVersion": 1,
+      "position": [1560, 260],
+      "notes": "Aktualizuje lead v Odoo CRM: stage = Qualified, doplní zozbierané dáta z AI bota."
+    },
+    {
+      "parameters": {
+        "sendTo": "obchod@ecoprodukt.sk",
+        "subject": "=🔥 Nový kvalifikovaný lead: {{ $('📊 Zisti stav konverzácie').item.json.lead_data.name }}",
+        "emailType": "html",
+        "message": "=<html><body style=\"font-family:Arial,sans-serif;\">\n  <h2 style=\"color:#2e7d32;\">Nový kvalifikovaný lead z AI bota</h2>\n  <table style=\"border-collapse:collapse;width:100%;\">\n    <tr><td style=\"padding:8px;border:1px solid #ddd;\"><strong>Meno</strong></td><td style=\"padding:8px;border:1px solid #ddd;\">{{ $('📊 Zisti stav konverzácie').item.json.lead_data.name }}</td></tr>\n    <tr><td style=\"padding:8px;border:1px solid #ddd;\"><strong>Email</strong></td><td style=\"padding:8px;border:1px solid #ddd;\">{{ $('📊 Zisti stav konverzácie').item.json.lead_data.email }}</td></tr>\n    <tr><td style=\"padding:8px;border:1px solid #ddd;\"><strong>Spotreba</strong></td><td style=\"padding:8px;border:1px solid #ddd;\">{{ $('📊 Zisti stav konverzácie').item.json.lead_data.annual_consumption_kwh }} kWh/rok</td></tr>\n    <tr><td style=\"padding:8px;border:1px solid #ddd;\"><strong>Kraj</strong></td><td style=\"padding:8px;border:1px solid #ddd;\">{{ $('📊 Zisti stav konverzácie').item.json.lead_data.location_region }}</td></tr>\n    <tr><td style=\"padding:8px;border:1px solid #ddd;\"><strong>Budget</strong></td><td style=\"padding:8px;border:1px solid #ddd;\">{{ $('📊 Zisti stav konverzácie').item.json.lead_data.budget_eur }} €</td></tr>\n  </table>\n  <p><a href=\"{{ $env.ODOO_BASE_URL }}/web#id={{ $('🎯 Odoo: Nový Lead (Webhook)').item.json.body.lead_id }}&model=crm.lead\">Otvoriť v Odoo CRM →</a></p>\n</body></html>",
+        "options": {}
+      },
+      "id": "node-notify-sales",
+      "name": "🔔 Notifikuj obchodný tím",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [1780, 260],
+      "notes": "Pošle obchodnému tímu súhrn dát. Obchodník môže nadviazať pri väčších projektoch."
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('🎯 Odoo: Nový Lead (Webhook)').item.json.body.email }}",
+        "subject": "Stále môžeme pomôcť s fotovoltaikou — ECO PRODUKT",
+        "emailType": "html",
+        "message": "=<html><body style=\"font-family:Arial,sans-serif;max-width:600px;\">\n  <p>Dobrý deň,</p>\n  <p>vidíme, že ste mali záujem o fotovoltický systém. Máte ešte otázky? Naša kalkulačka je dostupná kedykoľvek:</p>\n  <p style=\"text-align:center;\"><a href=\"{{ $env.ECO_BOT_FRONTEND_URL }}\" style=\"background:#2e7d32;color:white;padding:12px 24px;text-decoration:none;border-radius:6px;\">Spustiť kalkulačku →</a></p>\n  <p>Alebo nás kontaktujte priamo na <a href=\"mailto:info@ecoprodukt.sk\">info@ecoprodukt.sk</a></p>\n</body></html>",
+        "options": {}
+      },
+      "id": "node-followup-email",
+      "name": "📬 Follow-up email (nekvalifikovaný)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [1560, 500],
+      "notes": "Zákazník neskončil konverzáciu = follow-up po 3 dňoch."
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: 'ok', conversation_id: $('🤖 Spusti AI Bot konverzáciu').item.json.conversation_id }) }}"
+      },
+      "id": "node-respond",
+      "name": "↩️ Respond to Odoo",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [900, 560]
+    },
+    {
+      "parameters": {
+        "errorMessage": "AI Bot API nedostupný — skúste znova alebo kontaktujte administrátora."
+      },
+      "id": "node-error",
+      "name": "⚠️ Error Handler",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [900, 480]
+    }
+  ],
+  "connections": {
+    "🎯 Odoo: Nový Lead (Webhook)": {
+      "main": [[{ "node": "🤖 Spusti AI Bot konverzáciu", "type": "main", "index": 0 }]]
+    },
+    "🤖 Spusti AI Bot konverzáciu": {
+      "main": [[{ "node": "✅ Konverzácia vytvorená?", "type": "main", "index": 0 }]]
+    },
+    "✅ Konverzácia vytvorená?": {
+      "main": [
+        [
+          { "node": "📧 Pošli email zákazníkovi", "type": "main", "index": 0 },
+          { "node": "⏱️ Čakaj 30 minút", "type": "main", "index": 0 },
+          { "node": "↩️ Respond to Odoo", "type": "main", "index": 0 }
+        ],
+        [{ "node": "⚠️ Error Handler", "type": "main", "index": 0 }]
+      ]
+    },
+    "⏱️ Čakaj 30 minút": {
+      "main": [[{ "node": "📊 Zisti stav konverzácie", "type": "main", "index": 0 }]]
+    },
+    "📊 Zisti stav konverzácie": {
+      "main": [[{ "node": "🎯 Zákazník kvalifikovaný?", "type": "main", "index": 0 }]]
+    },
+    "🎯 Zákazník kvalifikovaný?": {
+      "main": [
+        [
+          { "node": "✅ Odoo: Označ ako Kvalifikovaný", "type": "main", "index": 0 }
+        ],
+        [{ "node": "📬 Follow-up email (nekvalifikovaný)", "type": "main", "index": 0 }]
+      ]
+    },
+    "✅ Odoo: Označ ako Kvalifikovaný": {
+      "main": [[{ "node": "🔔 Notifikuj obchodný tím", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "tags": ["ECO PRODUKT", "AI Automation", "Sales", "Fotovoltika"],
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "ecoprodukt-production"
+  },
+  "pinData": {},
+  "versionId": "1.0.0"
+}
