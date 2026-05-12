@@ -6,8 +6,10 @@ from models.conversation import Conversation, Message, MessageRole, Conversation
 from services.pv_calculator import calculate_system, format_proposal_text
 from data.pv_knowledge import SYSTEM_PROMPT
 
-client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
-MODEL = "claude-haiku-4-5-20251001"  # fast + cost-effective for chat
+def _get_client():
+    return anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+
+MODEL = "claude-haiku-4-5-20251001"
 
 TOOLS = [
     {
@@ -125,7 +127,7 @@ async def get_ai_response(conversation: Conversation, user_message: str) -> tupl
 
     # Agentic loop: Claude may call tools multiple times
     while True:
-        response = client.messages.create(
+        response = _get_client().messages.create(
             model=MODEL,
             max_tokens=1024,
             system=SYSTEM_PROMPT,
