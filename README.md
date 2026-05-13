@@ -2,7 +2,7 @@
 
 Automatizovaný predajný asistent pre fotovoltické systémy. Zákazník chatuje s AI botom, ktorý zbiera kvalifikačné dáta a generuje personalizovanú ponuku — bez obchodníka.
 
-**Live demo:** https://ecoprodukt-bot.up.railway.app  
+**Live demo:** https://ecoproduktriesenie-production.up.railway.app  
 **Architecture:** [docs/architecture.html](docs/architecture.html)
 
 ## Čo to robí
