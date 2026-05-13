@@ -11,9 +11,9 @@ Dobrý deň, pani Kováčová,
 
 Namiesto prezentácie architektúry som preto **rovno postavil funkčný prototyp**, ktorý môžete ihneď vyskúšať:
 
-🌐 **Live demo:** https://ecoprodukt-bot.up.railway.app  
+🌐 **Live demo:** https://ecoproduktriesenie-production.up.railway.app  
 📁 **Zdrojový kód:** https://github.com/[username]/ecoprodukt-ai-bot  
-🏗️ **Architektúra (interaktívna):** https://ecoprodukt-bot.up.railway.app/static/docs/architecture.html
+🏗️ **Architektúra (interaktívna):** otvorte priložený súbor `architecture.html`
 
 ---
 
