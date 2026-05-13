@@ -23,7 +23,7 @@ app.include_router(conversation.router, prefix="/api")
 app.include_router(webhook.router, prefix="/webhook")
 
 # Serve frontend from /static if it exists
-frontend_path = os.path.join(os.path.dirname(__file__), "..", "frontend")
+frontend_path = os.path.join(os.path.dirname(__file__), "frontend")
 if os.path.exists(frontend_path):
     app.mount("/static", StaticFiles(directory=frontend_path), name="static")
 
