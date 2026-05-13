@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Automatizácia FV Predaja — Ľubomír Serafín</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --green: #2e7d32; --green-light: #4caf50; --green-dark: #1b5e20;
+      --green-pale: #e8f5e9; --white: #fff; --dark: #0d1f0e;
+      --gray: rgba(255,255,255,0.65);
+      --grad: linear-gradient(135deg, #2e7d32, #43a047);
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#0d1f0e; color:#fff; font-family:'Segoe UI',system-ui,sans-serif; overflow:hidden; }
+
+    .slide-deck {
+      position:relative; width:100vw; height:100vh; overflow:hidden;
+    }
+    @media(min-width:769px){
+      .slide-deck {
+        max-width:calc(100vh * 16/9);
+        max-height:calc(100vw * 9/16);
+        margin:auto; position:absolute; inset:0;
+      }
+    }
+
+    .slide {
+      position:absolute; width:100%; height:100%;
+      display:flex; flex-direction:column; justify-content:center; align-items:center;
+      padding:60px; opacity:0; visibility:hidden;
+      transition:opacity 0.4s;
+      background:#0d1f0e; overflow:hidden;
+    }
+    .slide.active { opacity:1; visibility:visible; }
+    .slide-content { width:100%; max-width:100%; max-height:100%; overflow:hidden; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:20px; }
+
+    /* PROGRESS + NAV */
+    .progress-bar { position:fixed; top:0; left:0; height:3px; background:var(--green-light); transition:width 0.3s; z-index:1000; }
+    .nav-controls { position:fixed; bottom:28px; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:20px; z-index:1000; }
+    .nav-btn { background:rgba(255,255,255,0.1); border:none; color:#fff; width:40px; height:40px; border-radius:50%; cursor:pointer; font-size:18px; transition:background 0.2s; }
+    .nav-btn:hover { background:rgba(255,255,255,0.25); }
+    .slide-counter { color:rgba(255,255,255,0.5); font-size:13px; }
+
+    /* TYPOGRAPHY */
+    .label { font-size:12px; text-transform:uppercase; letter-spacing:2px; color:var(--green-light); font-weight:600; margin-bottom:4px; }
+    .title { font-size:clamp(32px,5.5vw,72px); font-weight:800; line-height:1.1; background:var(--grad); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-align:center; }
+    .subtitle { font-size:clamp(15px,2vw,22px); color:var(--gray); text-align:center; max-width:700px; line-height:1.6; }
+    h2 { font-size:clamp(24px,4vw,48px); font-weight:700; color:#fff; text-align:center; }
+    h3 { font-size:clamp(16px,2.2vw,26px); font-weight:600; color:var(--green-light); }
+    p { font-size:clamp(13px,1.6vw,18px); color:var(--gray); line-height:1.7; }
+    strong { color:#fff; }
+
+    /* CARDS */
+    .cards { display:flex; gap:20px; width:100%; justify-content:center; flex-wrap:wrap; }
+    .card { background:rgba(255,255,255,0.05); border:1px solid rgba(78,160,80,0.3); border-radius:14px; padding:24px; flex:1; min-width:180px; max-width:260px; }
+    .card .icon { font-size:32px; margin-bottom:12px; }
+    .card h3 { font-size:clamp(14px,1.8vw,20px); margin-bottom:8px; }
+    .card p { font-size:clamp(12px,1.3vw,15px); }
+
+    /* FLOW */
+    .flow { display:flex; align-items:center; gap:0; flex-wrap:wrap; justify-content:center; width:100%; }
+    .flow-item { background:rgba(46,125,50,0.2); border:1px solid rgba(76,175,80,0.4); border-radius:10px; padding:14px 18px; text-align:center; min-width:120px; }
+    .flow-item .fi-icon { font-size:22px; }
+    .flow-item .fi-label { font-size:clamp(11px,1.2vw,13px); color:var(--gray); margin-top:4px; }
+    .flow-arrow { color:var(--green-light); font-size:20px; padding:0 6px; }
+
+    /* HIGHLIGHT BOX */
+    .highlight { background:rgba(46,125,50,0.15); border-left:4px solid var(--green-light); border-radius:0 10px 10px 0; padding:16px 20px; width:100%; max-width:760px; }
+
+    /* BIG NUMBERS */
+    .bignums { display:flex; gap:32px; justify-content:center; flex-wrap:wrap; }
+    .bignum { text-align:center; }
+    .bignum .num { font-size:clamp(36px,6vw,72px); font-weight:800; background:var(--grad); -webkit-background-clip:text; -webkit-text-fill-color:transparent; line-height:1; }
+    .bignum .lbl { font-size:clamp(11px,1.2vw,14px); color:var(--gray); text-transform:uppercase; letter-spacing:1px; margin-top:6px; }
+
+    /* STEPS */
+    .steps { display:flex; flex-direction:column; gap:12px; width:100%; max-width:720px; }
+    .step { display:flex; align-items:flex-start; gap:16px; }
+    .step-num { width:32px; height:32px; border-radius:50%; background:var(--green); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex-shrink:0; }
+    .step-body h4 { font-size:clamp(13px,1.5vw,17px); color:#fff; margin-bottom:2px; }
+    .step-body p { font-size:clamp(11px,1.2vw,14px); }
+
+    /* QUOTE */
+    .quote { border-left:3px solid var(--green-light); padding-left:20px; max-width:700px; }
+    .quote p { font-size:clamp(15px,2vw,22px); color:#fff; font-style:italic; line-height:1.5; }
+    .quote .author { font-size:13px; color:var(--green-light); margin-top:8px; }
+
+    /* CHIP */
+    .chip { background:rgba(76,175,80,0.2); border:1px solid rgba(76,175,80,0.4); border-radius:20px; padding:5px 14px; font-size:12px; color:var(--green-light); }
+    .chips { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+
+    /* ANIM */
+    @keyframes fadeUp { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
+    .slide.active .animate { animation:fadeUp 0.5s ease-out forwards; opacity:0; }
+    .slide.active .animate:nth-child(1){animation-delay:0.1s}
+    .slide.active .animate:nth-child(2){animation-delay:0.2s}
+    .slide.active .animate:nth-child(3){animation-delay:0.3s}
+    .slide.active .animate:nth-child(4){animation-delay:0.4s}
+    .slide.active .animate:nth-child(5){animation-delay:0.5s}
+    .slide.active .animate:nth-child(6){animation-delay:0.6s}
+
+    @media(max-width:768px){
+      .slide{padding:32px 20px;}
+      .cards{gap:12px;}
+      .card{padding:16px; min-width:140px;}
+      .flow-item{padding:10px 12px; min-width:90px;}
+    }
+  </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="slide-deck">
+
+  <!-- SLIDE 1: COVER -->
+  <div class="slide active">
+    <div class="slide-content">
+      <div class="label animate">Zadanie — Junior špecialista AI automatizácia</div>
+      <h1 class="title animate">Predajný proces FV systémov<br/>plne automatizovaný AI botom</h1>
+      <p class="subtitle animate">Analýza zadania, návrh architektúry a funkčná implementácia</p>
+      <div class="chips animate">
+        <span class="chip">FastAPI + Claude AI</span>
+        <span class="chip">n8n Workflow</span>
+        <span class="chip">Odoo CRM</span>
+        <span class="chip">Live demo</span>
+      </div>
+      <p class="animate" style="color:rgba(255,255,255,0.4);font-size:13px;margin-top:8px;">Ľubomír Serafín · Máj 2026</p>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: PROBLÉM -->
+  <div class="slide">
+    <div class="slide-content">
+      <div class="label animate">Problém</div>
+      <h2 class="animate">Ako vyzerá predaj FV systémov dnes</h2>
+      <div class="cards animate">
+        <div class="card">
+          <div class="icon">📋</div>
+          <h3>Formulár</h3>
+          <p>Zákazník vyplní kontaktný formulár alebo zavolá</p>
+        </div>
+        <div class="card">
+          <div class="icon">⏳</div>
+          <h3>Čakanie</h3>
+          <p>Čaká na spätné volanie obchodníka — hodiny až dni</p>
+        </div>
+        <div class="card">
+          <div class="icon">🤝</div>
+          <h3>Stretnutie</h3>
+          <p>Dohaduje sa termín, obchodník robí manuálnu kalkuláciu</p>
+        </div>
+        <div class="card">
+          <div class="icon">📄</div>
+          <h3>Ponuka</h3>
+          <p>Zákazník dostane ponuku po dňoch — mnoho odíde skôr</p>
+        </div>
+      </div>
+      <div class="highlight animate">
+        <p><strong>Kľúčový problém:</strong> Celý kvalifikačný proces je rutinný a dá sa plne automatizovať. Obchodník nemusí byť v slučke kým zákazník nie je seriózny kupujúci.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: ZADANIE + MOJE POCHOPENIE -->
+  <div class="slide">
+    <div class="slide-content">
+      <div class="label animate">Analýza zadania</div>
+      <h2 class="animate">Čo zadanie hovorí a čo som z toho pochopil</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;width:100%;max-width:800px;" class="animate">
+        <div class="card" style="max-width:none;border-color:rgba(255,200,0,0.3);">
+          <div style="color:#ffd54f;font-size:12px;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Zadanie hovorí</div>
+          <p style="font-size:14px;line-height:1.7;">"Lead <strong style="color:#ffd54f;">s kontaktom bude importovaný do Odoo</strong>. Zvyšok architektúry navrhnite Vy."</p>
+        </div>
+        <div class="card" style="max-width:none;">
+          <div style="color:var(--green-light);font-size:12px;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Moje pochopenie</div>
+          <p style="font-size:14px;line-height:1.7;">Odoo je <strong>vstupný bod</strong> — nesmiem ho obísť. Celá automatizácia <strong>začína</strong> v Odoo a <strong>končí</strong> aktualizáciou v Odoo.</p>
+        </div>
+      </div>
+      <div class="highlight animate">
+        <p>Preto som navrhol: <strong>Odoo Automation Rule → webhook → n8n → AI bot → zákazník → n8n → Odoo update.</strong> Odoo ostáva master systém pre všetky dáta.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: MOJE UVAŽOVANIE -->
+  <div class="slide">
+    <div class="slide-content">
+      <div class="label animate">Moje uvažovanie</div>
+      <h2 class="animate">Prečo vlastný AI bot a nie len n8n?</h2>
+      <div class="steps animate">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h4>n8n-only bot má limity v konverzácii</h4>
+            <p>Predaj FV systémov vyžaduje prirodzený dialóg — zákazník píše "platím okolo 80 eur mesačne", nie "spotreba: 5040 kWh/rok". n8n nevie interpretovať voľný text.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h4>Claude AI rieši neštruktúrovaný vstup</h4>
+            <p>LLM preloží "malý domček, platíme málo" na konkrétne parametre pre kalkuláciu. Zároveň kladie kontextové otázky — nie robotický formulár.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h4>n8n ostáva — robí čo robí dobre</h4>
+            <p>Orchestrácia (kedy, čo, komu), emailové notifikácie, Odoo update, follow-up plány. AI bot = inteligencia. n8n = plán B a C.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <h4>Tool use pre štruktúrované dáta</h4>
+            <p>Bot používa Anthropic "tool calling" — keď zákazník poskytne dostatok dát, automaticky zavolá PV Calculator a vygeneruje ponuku.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: ARCHITEKTÚRA / FLOW -->
+  <div class="slide">
+    <div class="slide-content">
+      <div class="label animate">Architektúra</div>
+      <h2 class="animate">Celý flow od leadu po ponuku</h2>
+      <div class="flow animate">
+        <div class="flow-item">
+          <div class="fi-icon">🏢</div>
+          <div class="fi-label">Odoo<br/>nový lead</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">
+          <div class="fi-icon">🔄</div>
+          <div class="fi-label">n8n<br/>webhook</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">
+          <div class="fi-icon">🤖</div>
+          <div class="fi-label">AI Bot<br/>konverzácia</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">
+          <div class="fi-icon">📧</div>
+          <div class="fi-label">Email<br/>zákazníkovi</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">
+          <div class="fi-icon">⚡</div>
+          <div class="fi-label">PV<br/>kalkulácia</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item" style="border-color:rgba(76,175,80,0.8);">
+          <div class="fi-icon">📊</div>
+          <div class="fi-label" style="color:#fff;">Ponuka<br/>+ Odoo update</div>
+        </div>
+      </div>
+      <div class="cards animate" style="margin-top:8px;">
+        <div class="card">
+          <h3>FastAPI Backend</h3>
+          <p>Konverzačná logika, session state, Claude API volania</p>
+        </div>
+        <div class="card">
+          <h3>PV Calculator</h3>
+          <p>Irradiance mapa SR, výkon, cena, ROI — čistá Python logika</p>
+        </div>
+        <div class="card">
+          <h3>Chat Widget</h3>
+          <p>Vanilla JS, žiadne závislosti, 1 riadok kódu na webe</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: DEMO -->
+  <div class="slide">
+    <div class="slide-content">
+      <div class="label animate">Live Demo</div>
+      <h2 class="animate">Funkčný prototyp — môžete vyskúšať teraz</h2>
+      <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(76,175,80,0.4);border-radius:16px;padding:24px 32px;width:100%;max-width:680px;" class="animate">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div style="width:12px;height:12px;border-radius:50%;background:#4caf50;box-shadow:0 0 8px #4caf50;"></div>
+          <span style="font-size:13px;color:rgba(255,255,255,0.5);">ecoproduktriesenie-production.up.railway.app</span>
+        </div>
+        <p style="font-size:15px;color:#fff;line-height:1.8;">
+          ✅ 7-krokový kvalifikačný rozhovor<br/>
+          ✅ Okamžitá kalkulácia systému (kWp, cena, ROI)<br/>
+          ✅ Personalizovaná ponuka so slovenskou irradiance mapou<br/>
+          ✅ Odoo webhook endpoint pripravený na napojenie<br/>
+          ✅ n8n workflow JSON — importovateľný ihneď
+        </p>
+      </div>
+      <div class="bignums animate">
+        <div class="bignum">
+          <div class="num">&lt;2s</div>
+          <div class="lbl">Čas na spustenie konverzácie</div>
+        </div>
+        <div class="bignum">
+          <div class="num">5 min</div>
+          <div class="lbl">Zákazníkov čas na ponuku</div>
+        </div>
+        <div class="bignum">
+          <div class="num">0</div>
+          <div class="lbl">Obchodníkov zásahov</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: BUSINESS VALUE -->
+  <div class="slide">
+    <div class="slide-content">
+      <div class="label animate">Business Value</div>
+      <h2 class="animate">Čo to reálne prinesie ECO PRODUKT</h2>
+      <div style="width:100%;max-width:700px;" class="animate">
+        <div style="height:clamp(160px,28vh,260px);">
+          <canvas id="roiChart"></canvas>
+        </div>
+      </div>
+      <div class="cards animate">
+        <div class="card">
+          <div class="icon">⏰</div>
+          <h3>Čas obchodníka</h3>
+          <p>Rutinná kvalifikácia trvá 30–60 min/lead. Pri 100 leadoch/mesiac = <strong>50–100h ušetrených</strong></p>
+        </div>
+        <div class="card">
+          <div class="icon">🚀</div>
+          <h3>Rýchlosť odpovede</h3>
+          <p>Z "zavoláme vám do 2 dní" na <strong>ponuku do 5 minút</strong>. Konverzia stúpa.</p>
+        </div>
+        <div class="card">
+          <div class="icon">💰</div>
+          <h3>Náklady systému</h3>
+          <p>~<strong>30–45 €/mesiac</strong> pri stovkách konverzácií. Claude Haiku = ~1 ct/konverzácia.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 8: TIMELINE -->
+  <div class="slide">
+    <div class="slide-content">
+      <div class="label animate">Plán do augusta 2026</div>
+      <h2 class="animate">Od prototypu po produkčný launch</h2>
+      <div class="steps animate" style="max-width:680px;">
+        <div class="step">
+          <div class="step-num" style="background:#4caf50;">✓</div>
+          <div class="step-body">
+            <h4>Fáza 1 — Hotová (teraz)</h4>
+            <p>Funkčný prototyp: AI bot, PV kalkulácia, chat widget, n8n workflow, live deploy</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h4>Fáza 2 — Jún 2026: Napojenie na reálne Odoo ECO PRODUKT</h4>
+            <p>Integrácia s vaším Odoo, prvých 20–50 reálnych leadov, ladenie dialógu</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h4>Fáza 3 — Júl 2026: Optimalizácia</h4>
+            <p>A/B testovanie otázok, analýza kde zákazníci odchádzajú, ladenie kalkulácie</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <h4>Fáza 4 — August 2026: Produkčný launch 🚀</h4>
+            <p>Plná automatizácia, monitoring, škálovanie na ďalšie produkty/trhy</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 9: CLOSING -->
+  <div class="slide">
+    <div class="slide-content">
+      <div class="label animate">Záver</div>
+      <div class="quote animate">
+        <p>"Zadanie som pochopil tak, že nestačí navrhnúť — treba ukázať že to viem aj postaviť. Preto som odovzdal funkčný systém, nie prezentáciu."</p>
+        <div class="author">— Ľubomír Serafín</div>
+      </div>
+      <div class="bignums animate">
+        <div class="bignum">
+          <div class="num">5</div>
+          <div class="lbl">Komponentov postavených</div>
+        </div>
+        <div class="bignum">
+          <div class="num">12</div>
+          <div class="lbl">n8n nodes</div>
+        </div>
+        <div class="bignum">
+          <div class="num">1</div>
+          <div class="lbl">Deň implementácie</div>
+        </div>
+      </div>
+      <div class="highlight animate" style="text-align:center;">
+        <p>🌐 <strong>Live demo:</strong> ecoproduktriesenie-production.up.railway.app</p>
+        <p style="margin-top:6px;">📁 <strong>GitHub:</strong> github.com/serafinlubomir27-pixel/EcoProdukt_riesenie</p>
+      </div>
+      <div class="chips animate">
+        <span class="chip">+421 911 445 903</span>
+        <span class="chip">lubomir.serafin@gmail.com</span>
+        <span class="chip">SZČO · 1 200–1 500 €/mes</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /.slide-deck -->
+
+<div class="nav-controls">
+  <button class="nav-btn" onclick="prevSlide()">←</button>
+  <span class="slide-counter"><span id="current">1</span> / <span id="total">9</span></span>
+  <button class="nav-btn" onclick="nextSlide()">→</button>
+</div>
+
+<script>
+let current = 1;
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+document.getElementById('total').textContent = total;
+
+function showSlide(n) {
+  if (n < 1) n = 1;
+  if (n > total) n = total;
+  current = n;
+  slides.forEach((s, i) => s.classList.toggle('active', i === n - 1));
+  document.getElementById('current').textContent = n;
+  document.getElementById('progressBar').style.width = (n / total * 100) + '%';
+  if (n === 7) initChart();
+}
+
+function nextSlide() { showSlide(current + 1); }
+function prevSlide() { showSlide(current - 1); }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+  if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+});
+document.addEventListener('click', e => {
+  if (!e.target.closest('.nav-controls')) nextSlide();
+});
+
+let chartInit = false;
+function initChart() {
+  if (chartInit) return;
+  chartInit = true;
+  new Chart(document.getElementById('roiChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Mesačné náklady systému', 'Úspora času obchodníka', 'Zvýšená konverzia (est.)'],
+      datasets: [{
+        label: '€/mesiac',
+        data: [40, 800, 500],
+        backgroundColor: ['rgba(76,175,80,0.6)', 'rgba(46,125,50,0.8)', 'rgba(27,94,32,0.9)'],
+        borderColor: ['#4caf50','#2e7d32','#1b5e20'],
+        borderWidth: 2,
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.6)', font: { size: 12 } } },
+        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.6)', callback: v => v + ' €' } }
+      }
+    }
+  });
+}
+
+showSlide(1);
+</script>
+</body>
+</html>

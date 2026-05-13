@@ -1,51 +1,53 @@
 # Email odpoveď — ECO PRODUKT zadanie
 
-**Komu:** Ing. Martina Kováčová, MBA (CMO, ECO PRODUKT)  
-**Predmet:** Re: Junior špecialistu pre AI automatizáciu — vypracované zadanie
+**Komu:** martina.kovacova@ecoprodukt.sk  
+**Predmet:** Re: Zadanie — Junior špecialista AI automatizácia | Ľubomír Serafín
 
 ---
 
 Dobrý deň, pani Kováčová,
 
-ďakujem za zaslanie zadania — bol som rád, že sa nechce len "uvažovanie na papieri", ale reálne riešenie.
+ďakujem za zaslanie zadania. Namiesto prezentácie som rovno postavil funkčný systém — môžete ho ihneď vyskúšať:
 
-Namiesto prezentácie architektúry som preto **rovno postavil funkčný prototyp**, ktorý môžete ihneď vyskúšať:
-
-🌐 **Live demo:** https://ecoproduktriesenie-production.up.railway.app  
-📁 **Zdrojový kód:** https://github.com/[username]/ecoprodukt-ai-bot  
-🏗️ **Architektúra (interaktívna):** otvorte priložený súbor `architecture.html`
+🌐 **Live demo:** https://ecoproduktriesenie-production.up.railway.app
+📁 **Zdrojový kód:** https://github.com/serafinlubomir27-pixel/EcoProdukt_riesenie
 
 ---
 
-## Čo som postavil
+**Podmienka zo zadania (lead importovaný do Odoo) je splnená ako vstupný bod celého flow:**
 
-Systém pozostáva z troch prepojených vrstiev:
+```
+Nový lead v Odoo
+  → Odoo Automation Rule spustí webhook
+  → n8n zachytí udalosť
+  → spustí AI bota + pošle zákazníkovi personalizovaný email s odkazom na chat
+  → zákazník chatuje s AI asistentom (bez obchodníka)
+  → bot zbiera: typ nehnuteľnosti, spotreba, strecha, lokalita, budget
+  → okamžite vygeneruje ponuku (kWp, cena, ROI, návratnosť)
+  → n8n aktualizuje lead v Odoo (stage: Qualified + zozbierané dáta)
+  → notifikácia obchodného tímu
+```
 
-**1. AI Sales Bot** — FastAPI backend s Claude AI, ktorý vedie zákazníka cez 7-krokový kvalifikačný rozhovor a okamžite vygeneruje personalizovanú ponuku (výkon systému, cena, ročná úspora, návratnosť). Bez čakania na obchodníka.
+Zvyšok architektúry (AI bot, kalkulácia, email flow, Odoo update) som navrhol a implementoval. V prílohe je kompletný **n8n workflow** (importovateľný JSON) a **interaktívny architecture diagram**.
 
-**2. n8n Workflow** (10 nodes, importovateľný JSON) — Odoo webhook → spustenie bota → personalizovaný email zákazníkovi → sledovanie výsledku → aktualizácia Odoo → notifikácia tímu. Podmienka zo zadania (lead importovaný do Odoo = vstupný bod) je plne splnená.
-
-**3. Embedovateľný chat widget** — Vanilla JS, žiadne závislosti, dá sa pridať na ecoprodukt.sk jedným riadkom kódu.
-
-Náklady na prevádzku: ~30–45 €/mesiac pri stovkách konverzácií.
-
----
-
-## Odpovede na vaše otázky
-
-**Forma spolupráce:** Uprednostňujem živnosť (SZČO) — pre obe strany najflexibilnejšia forma. Som flexibilný aj pri iných variantoch podľa vašich potrieb.
-
-**Výška odmeny:** Očakávam 1 200 – 1 500 € mesačne (brutto/fakturácia), v závislosti od rozsahu a formy spolupráce. Sme otvorení diskusii.
-
----
-
-Rád zodpoviem akékoľvek technické otázky alebo predvediem systém naživo pri online hovore.
-
-S pozdravom,  
-**Ľubomír Serafín**  
-[telefón]  
-[email]
+**Čo som postavil:**
+- FastAPI backend s Claude AI — 7-krokový kvalifikačný rozhovor
+- PV Calculator — výpočet výkonu, ceny a ROI pre každý kraj SR
+- Chat widget — embedovateľný na ecoprodukt.sk (jeden riadok kódu)
+- n8n workflow — 12 nodes, Odoo → AI bot → email → Odoo update
+- Prevádzka: ~30–45 €/mesiac pri stovkách konverzácií
 
 ---
 
-*Prílohy: architecture.html (architektúra systému), ecoprodukt-sales-automation.json (n8n workflow)*
+**Forma spolupráce:** Živnosť (SZČO)
+
+**Odmena:** 1 200 – 1 500 €/mesiac
+
+---
+
+S pozdravom,
+**Ľubomír Serafín**
++421 911 445 903
+lubomir.serafin@gmail.com
+
+*Prílohy: ecoprodukt-sales-automation.json (n8n workflow), architecture.html (diagram)*
