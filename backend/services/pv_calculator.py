@@ -5,7 +5,7 @@ from typing import Optional
 IRRADIANCE_BY_REGION = {
     "bratislavský": 1100,
     "trnavský": 1080,
-    "trenčínský": 1020,
+    "trenčianský": 1020,
     "nitrianský": 1090,
     "žilinský": 980,
     "banskobystrický": 1010,

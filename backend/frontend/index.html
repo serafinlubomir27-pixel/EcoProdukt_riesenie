@@ -6,8 +6,10 @@
   <title>ECO PRODUKT — AI Predajný Asistent</title>
   <link rel="stylesheet" href="/static/styles.css" />
   <script>
-    // API base URL — override for production
-    window.ECO_API_BASE = window.location.hostname === "localhost"
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+      location.replace('https://' + location.hostname + location.pathname + location.search);
+    }
+    window.ECO_API_BASE = location.hostname === "localhost"
       ? "http://localhost:8000"
       : "https://ecoproduktriesenie-production.up.railway.app";
   </script>

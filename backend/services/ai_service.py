@@ -177,6 +177,6 @@ def get_welcome_message(lead_name: Optional[str] = None) -> str:
         f"navrhnúť fotovoltický systém na mieru — bez čakania na obchodníka.\n\n"
         f"Celý proces trvá asi 5 minút. Na základe vašich údajov vám okamžite vypočítam "
         f"optimálny systém, cenu a návratnosť investície.\n\n"
-        f"Začneme jednoducho: **Aký typ nehnuteľnosti chcete vybavi fotovoltaikou?**\n"
+        f"Začneme jednoducho: **Aký typ nehnuteľnosti chcete vybaviť fotovoltaikou?**\n"
         f"_(Rodinný dom / Firma / Chata / Bytovka)_"
     )
